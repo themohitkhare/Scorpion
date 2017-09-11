@@ -25,6 +25,5 @@ def Evaluation(Article):
     print("     Negative : " + str(parsed_json['probability']['neg']))
     print("     Positive : " + str(parsed_json['probability']['pos']))
     print("     Neutral  : " + str(parsed_json['probability']['neutral']))
-    return [parsed_json['label'],str(parsed_json['probability']['neg']),str(parsed_json['probability']['pos']),str(parsed_json['probability']['neutral'])]
-
-
+    return [parsed_json['label'], str(parsed_json['probability']['pos']), str(parsed_json['probability']['neg']),
+            str(parsed_json['probability']['neutral'])]
