@@ -1,9 +1,6 @@
 import requests
 import sqlite3
 from bs4 import BeautifulSoup
-import json
-from googlefinance import getQuotes
-import urllib
 
 dataBase = sqlite3.connect('Sting.db')
 
