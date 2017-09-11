@@ -36,7 +36,6 @@ def getnewslinks(Name):
             continue
 
     soup = BeautifulSoup(source_code, 'html.parser')
-    print(Name)
     links = soup.find_all('a', {'role': 'heading'})
     for link in links:
         linklist.append(link.get('href'))
@@ -45,10 +44,14 @@ def getnewslinks(Name):
 
 def getnewsarticles(linklist, cName):
     print(cName)
+    db = dataBase.cursor()
+    Query = "CREATE TABLE IF NOT EXISTS " + str(cName).replace(" ",
+                                                               "_") + "(DATE,SOURCE varchar(30),EVALUATION varchar(8),POSITIVE Float,NEGATIVE Float,NEUTRAL Float)"
+    # db.execute('CREATE TABLE ?(DATE,SOURCE varchar(30),EVALUATION varchar(8),POSITIVE Float,NEGATIVE Float,NEUTRAL Float)',(cName))
+    db.execute(Query)
     for link in linklist:
-        print(link)
-        source = link[:link[7:].find('/')]
-        db = dataBase.cursor()
+        source = str(link).split("//")[-1].split("/")[0] if (
+        str(link).split("//")[-1].split("/")[0][:3] == 'www') else "www." + str(link).split("//")[-1].split("/")[0]
         source_code = ''
         while source_code == '':
             try:
@@ -68,13 +71,19 @@ def getnewsarticles(linklist, cName):
                 article += data
             else:
                 pass
-        print(article)
-        print(len(article))
         if len(article) == 0:
             article = 'This is a neutral sentence'
-        Eval = Dictionary(article)
-        print(source)
-        #print(cName)
-        #print(Eval)
-        db.execute('CREATE TABLE ?()')
+        try:
+            Eval = Dictionary(article)
+            date = time.strftime("%d-%m-%Y", time.gmtime())
+            print(date)
+            print(source)
+            print(Eval[0])
+            db.execute("INSERT INTO " + str(cName).replace(" ", "_") + " VALUES (?,?,?,?,?,?)",
+                       (date, source, Eval[0], Eval[1], Eval[2], Eval[3]))
+        except ValueError:
+            pass
+    dataBase.commit()
+
+
 getnews()
