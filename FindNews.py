@@ -9,7 +9,7 @@ dataBase = sqlite3.connect('Sting.db')
 
 def getnews():
     db = dataBase.cursor()
-    db.execute("SELECT Name FROM Companies ORDER BY Frequency DESC")
+    db.execute("SELECT Name FROM Companies WHERE Frequency<250 ORDER BY Frequency DESC")
     List = db.fetchall()
     for x in List:
         getnewsarticles(getnewslinks(x[0]),x[0])
@@ -45,9 +45,9 @@ def getnewslinks(Name):
 def getnewsarticles(linklist, cName):
     print(cName)
     db = dataBase.cursor()
-    Query = "CREATE TABLE IF NOT EXISTS " + str(cName).replace(" ",
-                                                               "_") + "(DATE,SOURCE varchar(30),EVALUATION varchar(8),POSITIVE Float,NEGATIVE Float,NEUTRAL Float)"
-    # db.execute('CREATE TABLE ?(DATE,SOURCE varchar(30),EVALUATION varchar(8),POSITIVE Float,NEGATIVE Float,NEUTRAL Float)',(cName))
+    Query = "CREATE TABLE IF NOT EXISTS " + str(cName).replace("&", "").replace('.', "").replace(';', "").replace("  ",
+                                                                                                                  " ").replace(
+        " ", "_") + "(DATE,SOURCE varchar(30),EVALUATION varchar(8),POSITIVE Float,NEGATIVE Float,NEUTRAL Float)"
     db.execute(Query)
     for link in linklist:
         source = str(link).split("//")[-1].split("/")[0] if (
@@ -79,7 +79,9 @@ def getnewsarticles(linklist, cName):
             print(date)
             print(source)
             print(Eval[0])
-            db.execute("INSERT INTO " + str(cName).replace(" ", "_") + " VALUES (?,?,?,?,?,?)",
+            db.execute("INSERT INTO " + str(cName).replace("&", "").replace('.', "").replace(';', "").replace("  ",
+                                                                                                              " ").replace(
+                " ", "_") + " VALUES (?,?,?,?,?,?)",
                        (date, source, Eval[0], Eval[1], Eval[2], Eval[3]))
         except ValueError:
             pass
