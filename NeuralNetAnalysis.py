@@ -1,23 +1,23 @@
-# import seaborn as sns
-# import numpy as np
+import seaborn as sns
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.pyplot as plt2
 import pandas as pd
-# from pandas import datetime
-# import math, time
-# import itertools
+from pandas import datetime
+import math, time
+import itertools
 from sklearn import preprocessing
-# import datetime
-# from sklearn.metrics import mean_squared_error
-# from math import sqrt
-# from keras.models import Sequential
-# from keras.layers.core import Dense, Dropout, Activation
-# from keras.layers.recurrent import LSTM
-# from keras.models import load_model
-# import keras
-# import pandas_datareader.data as web
-# import h5py
-# from keras import backend as K
+import datetime
+from sklearn.metrics import mean_squared_error
+from math import sqrt
+from keras.models import Sequential
+from keras.layers.core import Dense, Dropout, Activation
+from keras.layers.recurrent import LSTM
+from keras.models import load_model
+import keras
+import pandas_datareader.data as web
+import h5py
+from keras import backend as K
 import quandl
 
 quandl.ApiConfig.api_key = 'zpFWg7jpwtBPmzA8sT2Z'
@@ -39,14 +39,14 @@ def get_stock_data(stock_code, normalize=True, ma=[]):
     df.drop(
         ['WAP', 'No. of Trades', 'Total Turnover', 'Deliverable Quantity', '% Deli. Qty to Traded Qty', 'Spread H-L',
          'Spread C-O'], 1, inplace=True)
-    df.set_index('Date', inplace=True)
+    df.set_index(df.index, inplace=True)
 
     # Renaming all the columns so that we can use the old version code
     df.rename(columns={'No. of Shares': 'Volume', 'Close': 'Adj Close'}, inplace=True)
 
     # Percentage change
-    # df['Pct'] = df['Adj Close'].pct_change()
-    # df.dropna(inplace=True)
+    df['Pct'] = df['Adj Close'].pct_change()
+    df.dropna(inplace=True)
 
     # Moving Average
     if ma != []:
