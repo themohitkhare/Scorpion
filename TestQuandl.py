@@ -1,5 +1,8 @@
 import quandl
+from sklearn import preprocessing
 
+x = preprocessing.MinMaxScaler()
+print(x)
 code = "500010"
 quandl.ApiConfig.api_key = "tHhnk2LX1KrKyxKKyhaz"
 data = quandl.get("BSE/BOM500010")
@@ -9,11 +12,12 @@ data.rename(columns={'No. of Shares': 'Volume', 'Close': 'Adj Close'}, inplace=T
 data['date'] = data.index
 data.set_index('date', inplace=True)
 data['Pct'] = data['Adj Close'].pct_change()
-print(data)
+print(x.fit_transform(data.Volume.values.reshape(-1, 1)))
 # df = quandl.get('BSE/BOM' + stock_name)
 # df = quandl.get_table('BSE.OIL.1')
 # df.drop(['ticker', 'open', 'high', 'low', 'close', 'ex-dividend', 'volume', 'split_ratio'], 1, inplace=True)
 # print(df, end=" ")
+'''
 df = quandl.get_table('WIKI/PRICES', ticker='GOOGL')
 df.drop(['ticker', 'open', 'high', 'low', 'close', 'ex-dividend', 'volume', 'split_ratio'], 1, inplace=True)
 df.set_index('date', inplace=True)
@@ -25,3 +29,4 @@ df.rename(columns={'adj_open': 'Open', 'adj_high': 'High', 'adj_low': 'Low', 'ad
 # Percentage change
 df['Pct'] = df['Adj Close'].pct_change()
 print(df)
+'''
