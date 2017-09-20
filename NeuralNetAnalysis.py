@@ -1,3 +1,7 @@
+'''
+Run the file with THEANO_FLAGS=device=cuda python using the terminal
+'''
+import theano.gpuarray
 import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
@@ -27,7 +31,7 @@ neurons = [256, 256, 32, 1]
 dropout = 0.3
 decay = 0.5
 epochs = 72
-stock_code = '500010'
+stock_code = '500112'
 
 
 def get_stock_data(stock_code, normalize=True, ma=[]):
@@ -105,6 +109,7 @@ def load_data(stock, seq_len):
         result.append(data[index: index + sequence_length])  # index : index + 22days
 
     result = np.array(result)
+    print(result.shape)
     row = round(0.8 * result.shape[0])  # 80% split
     print("Amount of training data = {}".format(0.9 * result.shape[0]))
     print("Amount of testing data = {}".format(0.1 * result.shape[0]))
@@ -144,6 +149,7 @@ def build_model(shape, neurons, dropout, decay):
 
 
 model = build_model(shape, neurons, dropout, decay)
+
 
 model.fit(
     X_train,
