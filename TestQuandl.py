@@ -1,8 +1,8 @@
 import quandl
 from sklearn import preprocessing
+import numpy as np
 
 x = preprocessing.MinMaxScaler()
-print(x)
 code = "500010"
 quandl.ApiConfig.api_key = "tHhnk2LX1KrKyxKKyhaz"
 data = quandl.get("BSE/BOM500010")
@@ -27,6 +27,7 @@ def load_data(stock, seq_len):
 
     result = np.array(result)
     row = round(0.8 * result.shape[0])  # 80% split
+    print(row)
     print("Amount of training data = {}".format(0.9 * result.shape[0]))
     print("Amount of testing data = {}".format(0.1 * result.shape[0]))
 
