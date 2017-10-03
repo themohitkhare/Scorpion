@@ -9,11 +9,10 @@ dataBase = sqlite3.connect('Sting.db')
 
 def getnews():
     db = dataBase.cursor()
-    db.execute("SELECT Name FROM Companies WHERE Frequency<250 ORDER BY Frequency DESC")
+    db.execute("SELECT Name FROM Companies ORDER BY Frequency DESC")
     List = db.fetchall()
     for x in List:
-        getnewsarticles(getnewslinks(x[0]),x[0])
-
+        getnewsarticles(getnewslinks(x[0]), x[0])
 
 def getnewslinks(Name):
     linklist = []
@@ -89,3 +88,6 @@ def getnewsarticles(linklist, cName):
 
 
 getnews()
+def eval_news(name):
+    db = dataBase.cursor()
+    db.execute("SELECT ")

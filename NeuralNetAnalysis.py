@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.pyplot as plt2
 import pandas as pd
+import os
 from pandas import datetime
 import math, time
 import itertools
@@ -14,7 +15,7 @@ from sklearn import preprocessing
 import datetime
 from sklearn.metrics import mean_squared_error
 from math import sqrt
-from keras.models import Sequential
+from keras.models import Sequential, model_from_json
 from keras.layers.core import Dense, Dropout, Activation
 from keras.layers.recurrent import LSTM
 from keras.models import load_model
@@ -23,15 +24,19 @@ import pandas_datareader.data as web
 import h5py
 from keras import backend as K
 import quandl
+import sqlite3
+
+dataBase = sqlite3.connect('Sting.db')
 
 quandl.ApiConfig.api_key = 'tHhnk2LX1KrKyxKKyhaz'
-seq_len = 22
+seq_len = 21
+days = 30
 shape = [seq_len, 9, 1]
 neurons = [256, 256, 32, 1]
 dropout = 0.3
 decay = 0.5
-epochs = 30
-stock_code = '512599'
+epochs = 75
+#stock_code = '500180'
 
 
 def get_stock_data(stock_code, normalize=True, ma=[]):
@@ -79,10 +84,9 @@ def get_stock_data(stock_code, normalize=True, ma=[]):
 
     return df
 
-df = get_stock_data(stock_code, ma=[50, 100, 200])
 
 def plot_stock(df):
-    print(df.head())
+    print(df.tail())
     plt.subplot(211)
     plt.plot(df['Adj Close'], color='red', label='Adj Close')
     plt.legend(loc='best')
@@ -90,12 +94,6 @@ def plot_stock(df):
     plt.plot(df['Pct'], color='blue', label='Percentage change')
     plt.legend(loc='best')
     plt.show()
-
-plot_stock(df)
-
-corr = df.corr()
-ax = sns.heatmap(corr, cmap="YlGnBu")
-plt.show()
 
 
 def load_data(stock, seq_len):
@@ -109,25 +107,21 @@ def load_data(stock, seq_len):
         result.append(data[index: index + sequence_length])  # index : index + 22days
 
     result = np.array(result)
-    print(result)
-    row = round(0.8 * result.shape[0])  # 80% split
-    print("Amount of training data = {}".format(0.9 * result.shape[0]))
-    print("Amount of testing data = {}".format(0.1 * result.shape[0]))
+    row = round(0.99 * result.shape[0])  # 80% split
+    print("Amount of training data = {}".format(0.99 * result.shape[0]))
+    print("Amount of testing data = {}".format(0.01 * result.shape[0]))
 
     train = result[:int(row), :]  # 90% date
     X_train = train[:, :-1]  # all data until day m
     y_train = train[:, -1][:, -1]  # day m + 1 adjusted close price
 
-    X_test = result[int(row):, :-1]
-    y_test = result[int(row):, -1][:, -1]
+    X_test = result[-days:, :-1]
+    y_test = result[-days:, -1][:, -1]
 
     X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], amount_of_features))
     X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], amount_of_features))
 
     return [X_train, y_train, X_test, y_test]
-
-
-X_train, y_train, X_test, y_test = load_data(df, seq_len)
 
 
 def build_model(shape, neurons, dropout, decay):
@@ -148,18 +142,6 @@ def build_model(shape, neurons, dropout, decay):
     return model
 
 
-model = build_model(shape, neurons, dropout, decay)
-
-
-model.fit(
-    X_train,
-    y_train,
-    batch_size=512,
-    epochs=epochs,
-    validation_split=0.2,
-    verbose=1)
-
-
 def model_score(model, X_train, y_train, X_test, y_test):
     trainScore = model.evaluate(X_train, y_train, verbose=0)
     print('Train Score: %.5f MSE (%.2f RMSE)' % (trainScore[0], math.sqrt(trainScore[0])))
@@ -167,9 +149,6 @@ def model_score(model, X_train, y_train, X_test, y_test):
     testScore = model.evaluate(X_test, y_test, verbose=0)
     print('Test Score: %.5f MSE (%.2f RMSE)' % (testScore[0], math.sqrt(testScore[0])))
     return trainScore[0], testScore[0]
-
-
-model_score(model, X_train, y_train, X_test, y_test)
 
 
 def percentage_difference(model, X_test, y_test):
@@ -181,9 +160,6 @@ def percentage_difference(model, X_test, y_test):
 
         percentage_diff.append((pr - y_test[u] / pr) * 100)
     return p
-
-
-p = percentage_difference(model, X_test, y_test)
 
 
 def denormalize(stock_code, normalized_value):
@@ -215,6 +191,7 @@ def denormalize(stock_code, normalized_value):
 
 def plot_result(stock_name, normalized_value_p, normalized_value_y_test):
     newp = denormalize(stock_name, normalized_value_p)
+    print(newp)
     newy_test = denormalize(stock_name, normalized_value_y_test)
     plt2.plot(newp, color='red', label='Prediction')
     plt2.plot(newy_test, color='blue', label='Actual')
@@ -225,4 +202,56 @@ def plot_result(stock_name, normalized_value_p, normalized_value_y_test):
     plt2.show()
 
 
-plot_result(stock_code, p, y_test)
+if __name__ == '__main__':
+
+    db = dataBase.cursor()
+
+    db.execute("SELECT A.Name, A.BSE , B.Frequency FROM StockCode AS A LEFT JOIN Companies AS B WHERE A.Name = B.Name ORDER BY B.Frequency DESC;")
+
+    x = db.fetchall()
+
+    for y in x:
+
+        stock_code = str(y[1])
+        print(y[0])
+        df = get_stock_data(stock_code, ma=[50, 100, 200])
+
+        #plot_stock(df)
+
+        X_train, y_train, X_test, y_test = load_data(df, seq_len)
+
+        model = build_model(shape, neurons, dropout, decay)
+
+        d = os.getcwd() + "/Models/"
+
+        if os.path.isfile(d+"{}.json".format(stock_code)):
+            # load json and create model
+            # json_file = open(d+'{}.json'.format(stock_code), 'r')
+            # loaded_model_json = json_file.read()
+            # json_file.close()
+            # model = model_from_json(loaded_model_json)
+            # # load weights into new model
+            # model.load_weights(d+"{}.h5".format(stock_code))
+            # model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
+            # print("Loaded model from disk")
+            print("Model Found!!")
+            continue
+        else:
+            model.fit(X_train, y_train, batch_size=512, epochs=epochs, validation_split=0.2, verbose=1)
+            # Saving
+            # serialize model to JSON
+            model_json = model.to_json()
+            d = os.getcwd() + "/Models/"
+            with open(d+"{}.json".format(stock_code), "w") as json_file:
+                json_file.write(model_json)
+            # serialize weights to HDF5
+            model.save_weights(d+"{}.h5".format(stock_code))
+            print("Saved model to disk")
+
+
+
+        # model_score(model, X_train, y_train, X_test, y_test)
+        #
+        # p = percentage_difference(model, X_test, y_test)
+        #
+        # plot_result(stock_code, p, y_test)

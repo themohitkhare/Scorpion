@@ -10,5 +10,4 @@ def Dictionary(News):
         if word in Diction:
             clean_news += word + ' '
     return Evaluation(clean_news)
-    #return Dict
 
