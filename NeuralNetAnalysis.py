@@ -1,28 +1,20 @@
 '''
-Run the file with THEANO_FLAGS=device=cuda python using the terminal
+Run the file with THEANO_FLAGS=device=cuda python using the terminal for GPU
+Run the file with THEANO_FLAGS=device=cpu python using the terminal for CPUpip
+
 '''
-import theano.gpuarray
-import seaborn as sns
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.pyplot as plt2
 import pandas as pd
 import os
-from pandas import datetime
 import math, time
-import itertools
 from sklearn import preprocessing
-import datetime
-from sklearn.metrics import mean_squared_error
-from math import sqrt
 from keras.models import Sequential, model_from_json
 from keras.layers.core import Dense, Dropout, Activation
 from keras.layers.recurrent import LSTM
-from keras.models import load_model
 import keras
-import pandas_datareader.data as web
-import h5py
-from keras import backend as K
 import quandl
 import sqlite3
 
@@ -30,13 +22,16 @@ dataBase = sqlite3.connect('Sting.db')
 
 quandl.ApiConfig.api_key = 'tHhnk2LX1KrKyxKKyhaz'
 seq_len = 21
-days = 30
+days = 365
+s_name = ''
 shape = [seq_len, 9, 1]
 neurons = [256, 256, 32, 1]
 dropout = 0.3
 decay = 0.5
 epochs = 75
-#stock_code = '500180'
+
+
+# stock_code = '500180'
 
 
 def get_stock_data(stock_code, normalize=True, ma=[]):
@@ -93,7 +88,7 @@ def plot_stock(df):
     plt.subplot(212)
     plt.plot(df['Pct'], color='blue', label='Percentage change')
     plt.legend(loc='best')
-    plt.show()
+    plt.show(block=False)
 
 
 def load_data(stock, seq_len):
@@ -189,9 +184,9 @@ def denormalize(stock_code, normalized_value):
     return new
 
 
-def plot_result(stock_name, normalized_value_p, normalized_value_y_test):
+def plot_result(stock_name, normalized_value_p, normalized_value_y_test, s_name):
     newp = denormalize(stock_name, normalized_value_p)
-    print(newp)
+    # print(newp)
     newy_test = denormalize(stock_name, normalized_value_y_test)
     plt2.plot(newp, color='red', label='Prediction')
     plt2.plot(newy_test, color='blue', label='Actual')
@@ -199,14 +194,18 @@ def plot_result(stock_name, normalized_value_p, normalized_value_y_test):
     plt2.title('The test result for {}'.format(stock_name))
     plt2.xlabel('Days')
     plt2.ylabel('Adjusted Close')
-    plt2.show()
+    path = os.getcwd() + "/Graphs/" + s_name + str(days) + ".png"
+    plt2.savefig(path)
+    plt2.close()
+
 
 
 if __name__ == '__main__':
 
     db = dataBase.cursor()
 
-    db.execute("SELECT A.Name, A.BSE , B.Frequency FROM StockCode AS A LEFT JOIN Companies AS B WHERE A.Name = B.Name ORDER BY B.Frequency DESC;")
+    db.execute(
+        "SELECT A.Name, A.BSE , B.Frequency FROM StockCode AS A LEFT JOIN Companies AS B WHERE A.Name = B.Name ORDER BY B.Frequency DESC;")
 
     x = db.fetchall()
 
@@ -216,42 +215,37 @@ if __name__ == '__main__':
         print(y[0])
         df = get_stock_data(stock_code, ma=[50, 100, 200])
 
-        #plot_stock(df)
-
         X_train, y_train, X_test, y_test = load_data(df, seq_len)
 
         model = build_model(shape, neurons, dropout, decay)
 
         d = os.getcwd() + "/Models/"
 
-        if os.path.isfile(d+"{}.json".format(stock_code)):
+        if os.path.isfile(d + "{}.json".format(stock_code)):
             # load json and create model
-            # json_file = open(d+'{}.json'.format(stock_code), 'r')
-            # loaded_model_json = json_file.read()
-            # json_file.close()
-            # model = model_from_json(loaded_model_json)
-            # # load weights into new model
-            # model.load_weights(d+"{}.h5".format(stock_code))
-            # model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
-            # print("Loaded model from disk")
+            json_file = open(d + '{}.json'.format(stock_code), 'r')
+            loaded_model_json = json_file.read()
+            json_file.close()
+            model = model_from_json(loaded_model_json)
+            # load weights into new model
+            model.load_weights(d + "{}.h5".format(stock_code))
+            model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
+            print("Loaded model from disk")
             print("Model Found!!")
-            continue
         else:
             model.fit(X_train, y_train, batch_size=512, epochs=epochs, validation_split=0.2, verbose=1)
             # Saving
             # serialize model to JSON
             model_json = model.to_json()
             d = os.getcwd() + "/Models/"
-            with open(d+"{}.json".format(stock_code), "w") as json_file:
+            with open(d + "{}.json".format(stock_code), "w") as json_file:
                 json_file.write(model_json)
             # serialize weights to HDF5
-            model.save_weights(d+"{}.h5".format(stock_code))
+            model.save_weights(d + "{}.h5".format(stock_code))
             print("Saved model to disk")
 
+        model_score(model, X_train, y_train, X_test, y_test)
 
+        p = percentage_difference(model, X_test, y_test)
 
-        # model_score(model, X_train, y_train, X_test, y_test)
-        #
-        # p = percentage_difference(model, X_test, y_test)
-        #
-        # plot_result(stock_code, p, y_test)
+        plot_result(stock_code, p, y_test, y[0])

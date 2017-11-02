@@ -18,8 +18,7 @@ def Stock():
         print(x + " " + parser_json[x])
 
 
-
-from googlefinance import getQuotes
+# from googlefinance import getQuotes
 def financeinfo(symb):
     info = json.loads(json.dumps(getQuotes(symb), indent=2)[2:-2])
     for x in info:
@@ -53,10 +52,23 @@ def getnews():
     newsurl = url+version+newsmodify
     print(newsurl)
 
-getnews()
+
+#getnews()
 
 
 
 
 
 
+def install_and_import(package):
+    import importlib
+    try:
+        importlib.import_module(package)
+    except ImportError:
+        import pip
+        pip.main(['install', package])
+    finally:
+        globals()[package] = importlib.import_module(package)
+
+
+install_and_import('theano')
