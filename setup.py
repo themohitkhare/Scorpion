@@ -12,6 +12,7 @@ setup(name='Scorpion',
       author='Mohit Khare',
       author_email='mohitkhare582@gmail.com',
       packages=['sys', 'time', 'sqlite3', 'bs4', 'requests', 'tensorflow', 'keras', 'matplotlib', 'numpy', 'pandas',
-                'quandl', 'sklearn', 'nltk', 'json', 'urllib', 'nltk.word_tokenize', 'nltk.corpus.words', 'tensorflow-gpu', 'theano'],
+                'quandl', 'sklearn', 'nltk', 'json', 'urllib', 'nltk.word_tokenize', 'nltk.corpus.words',
+                'tensorflow-gpu', 'theano'],
       long_description=read('README.md'),
       )

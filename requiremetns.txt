@@ -1,0 +1,10 @@
+python
+beautifulSoups
+tensorflow/Tensorflow-gpu
+keras
+matplotlib
+numpy
+pandas
+quandl
+sklearn
+nltk
