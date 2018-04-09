@@ -42,6 +42,9 @@ Start the program by running main.py. It is a menu driven program for easy execu
     >>> nltk.download()
     ```
 
+##Results
+    * HDFC Bank ![alt text](https://github.com/mohitkhare582/Scorpion/blob/master/Graphs/HDFC%20Bank.png)
+    
 
 ## Future
 - Upcoming updates
