@@ -44,15 +44,15 @@ Start the program by running main.py. It is a menu driven program for easy execu
 
 ##Results
    **HDFC Bank**
-   ![alt text](https://github.com/mohitkhare582/Scorpion/tree/master/Graphs\HDFC Bank.png "HDFC Bank")
+   ![alt text](https://github.com/mohitkhare582/Scorpion/tree/master/Graphs\HDFC%20Bank.png "HDFC Bank")
    
    
    **ICICI Bank**
-   ![alt text](https://github.com/mohitkhare582/Scorpion/tree/master/Graphs\ICICI Bank.png "ICICI Bank")
+   ![alt text](https://github.com/mohitkhare582/Scorpion/tree/master/Graphs\ICICI%20Bank.png "ICICI Bank")
    
    
    **TATA Steel**
-   ![alt text](https://github.com/mohitkhare582/Scorpion/tree/master/Graphs\TATA Steel.png "TATA Steel")
+   ![alt text](https://github.com/mohitkhare582/Scorpion/tree/master/Graphs\TATA%20Steel.png "TATA Steel")
    
   
     
