@@ -62,7 +62,7 @@ Start the program by running main.py. It is a menu driven program for easy execu
 - Upcoming updates
     * Prediction for particular company.
     * Prediction for fucture days.
-    * Incresing accuracy for news evaluation.
+    * Increasing accuracy for news evaluation.
 
 Support
 -------
